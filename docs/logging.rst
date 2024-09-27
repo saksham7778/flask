@@ -1,12 +1,12 @@
-.. _logging:
-
 Logging
 =======
 
-Flask uses standard Python :mod:`logging`. All Flask-related messages are
-logged under the ``'flask'`` logger namespace.
-:meth:`Flask.logger <flask.Flask.logger>` returns the logger named
-``'flask.app'``, and can be used to log messages for your application. ::
+Flask uses standard Python :mod:`logging`. Messages about your Flask
+application are logged with :meth:`app.logger <flask.Flask.logger>`,
+which takes the same name as :attr:`app.name <flask.Flask.name>`. This
+logger can also be used to log your own messages.
+
+.. code-block:: python
 
     @app.route('/login', methods=['POST'])
     def login():
@@ -19,6 +19,9 @@ logged under the ``'flask'`` logger namespace.
         else:
             app.logger.info('%s failed to log in', user.username)
             abort(401)
+
+If you don't configure logging, Python's default log level is usually
+'warning'. Nothing below the configured level will be visible.
 
 
 Basic Configuration

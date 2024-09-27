@@ -1,5 +1,201 @@
 .. currentmodule:: flask
 
+Version 2.0.0
+-------------
+
+Released 2021-05-11
+
+-   Drop support for Python 2 and 3.5.
+-   Bump minimum versions of other Pallets projects: Werkzeug >= 2,
+    Jinja2 >= 3, MarkupSafe >= 2, ItsDangerous >= 2, Click >= 8. Be sure
+    to check the change logs for each project. For better compatibility
+    with other applications (e.g. Celery) that still require Click 7,
+    there is no hard dependency on Click 8 yet, but using Click 7 will
+    trigger a DeprecationWarning and Flask 2.1 will depend on Click 8.
+-   JSON support no longer uses simplejson. To use another JSON module,
+    override ``app.json_encoder`` and ``json_decoder``. :issue:`3555`
+-   The ``encoding`` option to JSON functions is deprecated. :pr:`3562`
+-   Passing ``script_info`` to app factory functions is deprecated. This
+    was not portable outside the ``flask`` command. Use
+    ``click.get_current_context().obj`` if it's needed. :issue:`3552`
+-   The CLI shows better error messages when the app failed to load
+    when looking up commands. :issue:`2741`
+-   Add :meth:`sessions.SessionInterface.get_cookie_name` to allow
+    setting the session cookie name dynamically. :pr:`3369`
+-   Add :meth:`Config.from_file` to load config using arbitrary file
+    loaders, such as ``toml.load`` or ``json.load``.
+    :meth:`Config.from_json` is deprecated in favor of this. :pr:`3398`
+-   The ``flask run`` command will only defer errors on reload. Errors
+    present during the initial call will cause the server to exit with
+    the traceback immediately. :issue:`3431`
+-   :func:`send_file` raises a :exc:`ValueError` when passed an
+    :mod:`io` object in text mode. Previously, it would respond with
+    200 OK and an empty file. :issue:`3358`
+-   When using ad-hoc certificates, check for the cryptography library
+    instead of PyOpenSSL. :pr:`3492`
+-   When specifying a factory function with ``FLASK_APP``, keyword
+    argument can be passed. :issue:`3553`
+-   When loading a ``.env`` or ``.flaskenv`` file, the current working
+    directory is no longer changed to the location of the file.
+    :pr:`3560`
+-   When returning a ``(response, headers)`` tuple from a view, the
+    headers replace rather than extend existing headers on the response.
+    For example, this allows setting the ``Content-Type`` for
+    ``jsonify()``. Use ``response.headers.extend()`` if extending is
+    desired. :issue:`3628`
+-   The ``Scaffold`` class provides a common API for the ``Flask`` and
+    ``Blueprint`` classes. ``Blueprint`` information is stored in
+    attributes just like ``Flask``, rather than opaque lambda functions.
+    This is intended to improve consistency and maintainability.
+    :issue:`3215`
+-   Include ``samesite`` and ``secure`` options when removing the
+    session cookie. :pr:`3726`
+-   Support passing a ``pathlib.Path`` to ``static_folder``. :pr:`3579`
+-   ``send_file`` and ``send_from_directory`` are wrappers around the
+    implementations in ``werkzeug.utils``. :pr:`3828`
+-   Some ``send_file`` parameters have been renamed, the old names are
+    deprecated. ``attachment_filename`` is renamed to ``download_name``.
+    ``cache_timeout`` is renamed to ``max_age``. ``add_etags`` is
+    renamed to ``etag``. :pr:`3828, 3883`
+-   ``send_file`` passes ``download_name`` even if
+    ``as_attachment=False`` by using ``Content-Disposition: inline``.
+    :pr:`3828`
+-   ``send_file`` sets ``conditional=True`` and ``max_age=None`` by
+    default. ``Cache-Control`` is set to ``no-cache`` if ``max_age`` is
+    not set, otherwise ``public``. This tells browsers to validate
+    conditional requests instead of using a timed cache. :pr:`3828`
+-   ``helpers.safe_join`` is deprecated. Use
+    ``werkzeug.utils.safe_join`` instead. :pr:`3828`
+-   The request context does route matching before opening the session.
+    This could allow a session interface to change behavior based on
+    ``request.endpoint``. :issue:`3776`
+-   Use Jinja's implementation of the ``|tojson`` filter. :issue:`3881`
+-   Add route decorators for common HTTP methods. For example,
+    ``@app.post("/login")`` is a shortcut for
+    ``@app.route("/login", methods=["POST"])``. :pr:`3907`
+-   Support async views, error handlers, before and after request, and
+    teardown functions. :pr:`3412`
+-   Support nesting blueprints. :issue:`593, 1548`, :pr:`3923`
+-   Set the default encoding to "UTF-8" when loading ``.env`` and
+    ``.flaskenv`` files to allow to use non-ASCII characters. :issue:`3931`
+-   ``flask shell`` sets up tab and history completion like the default
+    ``python`` shell if ``readline`` is installed. :issue:`3941`
+-   ``helpers.total_seconds()`` is deprecated. Use
+    ``timedelta.total_seconds()`` instead. :pr:`3962`
+-   Add type hinting. :pr:`3973`.
+
+
+Version 1.1.2
+-------------
+
+Released 2020-04-03
+
+-   Work around an issue when running the ``flask`` command with an
+    external debugger on Windows. :issue:`3297`
+-   The static route will not catch all URLs if the ``Flask``
+    ``static_folder`` argument ends with a slash. :issue:`3452`
+
+
+Version 1.1.1
+-------------
+
+Released 2019-07-08
+
+-   The ``flask.json_available`` flag was added back for compatibility
+    with some extensions. It will raise a deprecation warning when used,
+    and will be removed in version 2.0.0. :issue:`3288`
+
+
+Version 1.1.0
+-------------
+
+Released 2019-07-04
+
+-   Bump minimum Werkzeug version to >= 0.15.
+-   Drop support for Python 3.4.
+-   Error handlers for ``InternalServerError`` or ``500`` will always be
+    passed an instance of ``InternalServerError``. If they are invoked
+    due to an unhandled exception, that original exception is now
+    available as ``e.original_exception`` rather than being passed
+    directly to the handler. The same is true if the handler is for the
+    base ``HTTPException``. This makes error handler behavior more
+    consistent. :pr:`3266`
+
+    -   :meth:`Flask.finalize_request` is called for all unhandled
+        exceptions even if there is no ``500`` error handler.
+
+-   :attr:`Flask.logger` takes the same name as
+    :attr:`Flask.name` (the value passed as
+    ``Flask(import_name)``. This reverts 1.0's behavior of always
+    logging to ``"flask.app"``, in order to support multiple apps in the
+    same process. A warning will be shown if old configuration is
+    detected that needs to be moved. :issue:`2866`
+-   :meth:`flask.RequestContext.copy` includes the current session
+    object in the request context copy. This prevents ``session``
+    pointing to an out-of-date object. :issue:`2935`
+-   Using built-in RequestContext, unprintable Unicode characters in
+    Host header will result in a HTTP 400 response and not HTTP 500 as
+    previously. :pr:`2994`
+-   :func:`send_file` supports :class:`~os.PathLike` objects as
+    described in PEP 0519, to support :mod:`pathlib` in Python 3.
+    :pr:`3059`
+-   :func:`send_file` supports :class:`~io.BytesIO` partial content.
+    :issue:`2957`
+-   :func:`open_resource` accepts the "rt" file mode. This still does
+    the same thing as "r". :issue:`3163`
+-   The :attr:`MethodView.methods` attribute set in a base class is used
+    by subclasses. :issue:`3138`
+-   :attr:`Flask.jinja_options` is a ``dict`` instead of an
+    ``ImmutableDict`` to allow easier configuration. Changes must still
+    be made before creating the environment. :pr:`3190`
+-   Flask's ``JSONMixin`` for the request and response wrappers was
+    moved into Werkzeug. Use Werkzeug's version with Flask-specific
+    support. This bumps the Werkzeug dependency to >= 0.15.
+    :issue:`3125`
+-   The ``flask`` command entry point is simplified to take advantage
+    of Werkzeug 0.15's better reloader support. This bumps the Werkzeug
+    dependency to >= 0.15. :issue:`3022`
+-   Support ``static_url_path`` that ends with a forward slash.
+    :issue:`3134`
+-   Support empty ``static_folder`` without requiring setting an empty
+    ``static_url_path`` as well. :pr:`3124`
+-   :meth:`jsonify` supports :class:`dataclasses.dataclass` objects.
+    :pr:`3195`
+-   Allow customizing the :attr:`Flask.url_map_class` used for routing.
+    :pr:`3069`
+-   The development server port can be set to 0, which tells the OS to
+    pick an available port. :issue:`2926`
+-   The return value from :meth:`cli.load_dotenv` is more consistent
+    with the documentation. It will return ``False`` if python-dotenv is
+    not installed, or if the given path isn't a file. :issue:`2937`
+-   Signaling support has a stub for the ``connect_via`` method when
+    the Blinker library is not installed. :pr:`3208`
+-   Add an ``--extra-files`` option to the ``flask run`` CLI command to
+    specify extra files that will trigger the reloader on change.
+    :issue:`2897`
+-   Allow returning a dictionary from a view function. Similar to how
+    returning a string will produce a ``text/html`` response, returning
+    a dict will call ``jsonify`` to produce a ``application/json``
+    response. :pr:`3111`
+-   Blueprints have a ``cli`` Click group like ``app.cli``. CLI commands
+    registered with a blueprint will be available as a group under the
+    ``flask`` command. :issue:`1357`.
+-   When using the test client as a context manager (``with client:``),
+    all preserved request contexts are popped when the block exits,
+    ensuring nested contexts are cleaned up correctly. :pr:`3157`
+-   Show a better error message when the view return type is not
+    supported. :issue:`3214`
+-   ``flask.testing.make_test_environ_builder()`` has been deprecated in
+    favour of a new class ``flask.testing.EnvironBuilder``. :pr:`3232`
+-   The ``flask run`` command no longer fails if Python is not built
+    with SSL support. Using the ``--cert`` option will show an
+    appropriate error message. :issue:`3211`
+-   URL matching now occurs after the request context is pushed, rather
+    than when it's created. This allows custom URL converters to access
+    the app and request contexts, such as to query a database for an id.
+    :issue:`3088`
+
+
 Version 1.0.4
 -------------
 
@@ -30,7 +226,7 @@ Released 2019-05-17
 -   :func:`send_file` handles an ``attachment_filename`` that is a
     native Python 2 string (bytes) with UTF-8 coded bytes. :issue:`2933`
 -   A catch-all error handler registered for ``HTTPException`` will not
-    handle ``RoutingExcpetion``, which is used internally during
+    handle ``RoutingException``, which is used internally during
     routing. This fixes the unexpected behavior that had been introduced
     in 1.0. :pr:`2986`
 -   Passing the ``json`` argument to ``app.test_client`` does not
@@ -208,7 +404,7 @@ Released 2018-04-26
 -   Added :meth:`~flask.Flask.test_cli_runner` to create a Click runner
     that can invoke Flask CLI commands for testing. :pr:`2636`
 -   Subdomain matching is disabled by default and setting
-    :data:`SERVER_NAME` does not implicily enable it. It can be enabled
+    :data:`SERVER_NAME` does not implicitly enable it. It can be enabled
     by passing ``subdomain_matching=True`` to the ``Flask`` constructor.
     :pr:`2635`
 -   A single trailing slash is stripped from the blueprint
@@ -226,6 +422,14 @@ Released 2018-04-26
 -   Rewrote the tutorial docs and example project to take a more
     structured approach to help new users avoid common pitfalls.
     :pr:`2676`
+
+
+Version 0.12.5
+--------------
+
+Released 2020-02-10
+
+-   Pin Werkzeug to < 1.0.0. :issue:`3497`
 
 
 Version 0.12.4
@@ -313,7 +517,7 @@ Released 2016-05-29, codename Absinthe
 
 -   Added support to serializing top-level arrays to
     :func:`flask.jsonify`. This introduces a security risk in ancient
-    browsers. See :ref:`json-security` for details.
+    browsers.
 -   Added before_render_template signal.
 -   Added ``**kwargs`` to :meth:`flask.Test.test_client` to support
     passing additional keyword arguments to the constructor of
@@ -428,8 +632,7 @@ Version 0.10
 Released 2013-06-13, codename Limoncello
 
 -   Changed default cookie serialization format from pickle to JSON to
-    limit the impact an attacker can do if the secret key leaks. See
-    :ref:`upgrading-to-010` for more information.
+    limit the impact an attacker can do if the secret key leaks.
 -   Added ``template_test`` methods in addition to the already existing
     ``template_filter`` method family.
 -   Added ``template_global`` methods in addition to the already
@@ -458,8 +661,7 @@ Released 2013-06-13, codename Limoncello
 -   Added an option to generate non-ascii encoded JSON which should
     result in less bytes being transmitted over the network. It's
     disabled by default to not cause confusion with existing libraries
-    that might expect ``flask.json.dumps`` to return bytestrings by
-    default.
+    that might expect ``flask.json.dumps`` to return bytes by default.
 -   ``flask.g`` is now stored on the app context instead of the request
     context.
 -   ``flask.g`` now gained a ``get()`` method for not erroring out on
@@ -623,7 +825,7 @@ Released 2011-09-29, codename Rakija
     designated place to drop files that are modified at runtime (uploads
     etc.). Also this is conceptually only instance depending and outside
     version control so it's the perfect place to put configuration files
-    etc. For more information see :ref:`instance-folders`.
+    etc.
 -   Added the ``APPLICATION_ROOT`` configuration variable.
 -   Implemented :meth:`~flask.testing.TestClient.session_transaction` to
     easily modify sessions from the test environment.
@@ -703,8 +905,7 @@ Released 2011-06-28, codename Grappa
 -   Added ``teardown_request`` decorator, for functions that should run
     at the end of a request regardless of whether an exception occurred.
     Also the behavior for ``after_request`` was changed. It's now no
-    longer executed when an exception is raised. See
-    :ref:`upgrading-to-new-teardown-handling`
+    longer executed when an exception is raised.
 -   Implemented :func:`flask.has_request_context`
 -   Deprecated ``init_jinja_globals``. Override the
     :meth:`~flask.Flask.create_jinja_environment` method instead to
@@ -721,7 +922,7 @@ Released 2011-06-28, codename Grappa
     errors that might occur during request processing (for instance
     database connection errors, timeouts from remote resources etc.).
 -   Blueprints can provide blueprint specific error handlers.
--   Implemented generic :ref:`views` (class-based views).
+-   Implemented generic class-based views.
 
 
 Version 0.6.1
@@ -872,7 +1073,7 @@ Released 2010-05-28, codename Schnaps
 Version 0.2
 -----------
 
-Released 2010-05-12, codename Jägermeister
+Released 2010-05-12, codename J?germeister
 
 -   Various bugfixes
 -   Integrated JSON support

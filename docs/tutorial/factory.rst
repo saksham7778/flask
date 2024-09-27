@@ -30,7 +30,7 @@ directory should be treated as a package.
 
 .. code-block:: none
 
-    mkdir flaskr
+    $ mkdir flaskr
 
 .. code-block:: python
     :caption: ``flaskr/__init__.py``
@@ -135,29 +135,31 @@ exception, and restarts the server whenever you make changes to the
 code. You can leave it running and just reload the browser page as you
 follow the tutorial.
 
-For Linux and Mac:
+.. tabs::
 
-.. code-block:: none
+   .. group-tab:: Bash
 
-    export FLASK_APP=flaskr
-    export FLASK_ENV=development
-    flask run
+      .. code-block:: text
 
-For Windows cmd, use ``set`` instead of ``export``:
+         $ export FLASK_APP=flaskr
+         $ export FLASK_ENV=development
+         $ flask run
 
-.. code-block:: none
+   .. group-tab:: CMD
 
-    set FLASK_APP=flaskr
-    set FLASK_ENV=development
-    flask run
+      .. code-block:: text
 
-For Windows PowerShell, use ``$env:`` instead of ``export``:
+         > set FLASK_APP=flaskr
+         > set FLASK_ENV=development
+         > flask run
 
-.. code-block:: none
+   .. group-tab:: Powershell
 
-    $env:FLASK_APP = "flaskr"
-    $env:FLASK_ENV = "development"
-    flask run
+      .. code-block:: text
+
+         > $env:FLASK_APP = "flaskr"
+         > $env:FLASK_ENV = "development"
+         > flask run
 
 You'll see output similar to this:
 
